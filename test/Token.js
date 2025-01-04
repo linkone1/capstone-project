@@ -7,10 +7,15 @@ const tokens = (n) => {
 
 describe('Token Testing', () => {
     let token;
+    let accounts;
+    let deployer;
 
     beforeEach(async () => {
         const Token = await ethers.getContractFactory('Token');
-        token = await Token.deploy('Chaintask', 'CTK', 18, '1000000');
+        token = await Token.deploy('Chaintask', 'CTK', '1000000');
+
+        accounts = await ethers.getSigners();
+        deployer = accounts[0];
     });
 
     describe("Deployment", () => {
@@ -35,7 +40,13 @@ describe('Token Testing', () => {
         });
     
         it('has correct total supply', async() => {
+            // Runs test for the token total supply
             expect(await token.totalSupply()).to.equal(totalSupply);
+        });
+
+        it('assigns total supply to deployer', async () => {
+            expect(await token.balanceOf(deployer.address)).to.equal(totalSupply);
+
         });
     });
 });
