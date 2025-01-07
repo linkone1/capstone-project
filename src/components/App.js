@@ -7,7 +7,8 @@ import {
   loadProvider,
   loadNetwork,
   loadAccount,
-  loadToken
+  loadTokens,
+  loadExchange
 } from '../store/interactions';
 
 
@@ -16,14 +17,24 @@ function App() {
   const dispatch = useDispatch();
 
   const loadBlockchainData = async () => {
-    await loadAccount(dispatch);
-
     // Connect Ethers to blockchain
     const provider = loadProvider(dispatch);
+
+    // Fetch current netwoprk's chainId (e.g. hardhat: 31337, kovan: 42)
     const chainId = await loadNetwork(provider, dispatch);
 
-    // Token Smart Contract
-    await loadToken(provider, config[chainId].CTK.address, dispatch);
+    // Fetch current account & balance from metamask
+    await loadAccount(provider, dispatch);
+
+
+    // Load token smart contracts
+    const CTK = config[chainId].CTK;
+    const mETH = config[chainId].mETH;
+    await loadTokens(provider, [CTK.address, mETH.address], dispatch);
+
+    // Load exchange contract
+    const exchangeConfig = config[chainId].Exchange;
+    await loadExchange(provider, exchangeConfig.address, dispatch);
     }
   
 
