@@ -8,4 +8,7 @@ module.exports = {
   networks: {
     localhost: {}
   },
+  hardhat: {
+    chainId: 31337,
+  }
 };
