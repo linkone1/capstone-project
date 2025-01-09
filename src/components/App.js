@@ -25,6 +25,10 @@ function App() {
     // Fetch current netwoprk's chainId (e.g. hardhat: 31337, kovan: 42)
     const chainId = await loadNetwork(provider, dispatch);
 
+    window.ethereum.on('chainChanged', () => {
+      window.location.reload()
+    })
+
     window.ethereum.on('accountsChanged', () => {
       loadAccount(provider, dispatch);
     })

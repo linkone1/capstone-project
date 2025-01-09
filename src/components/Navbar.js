@@ -2,12 +2,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import Blockies from 'react-blockies';
 
 import logo from '../assets/logo.png';
+import config from '../config.json';
 import eth from '../assets/eth.svg';
 import { loadAccount } from '../store/interactions';
 
 
 const Navbar = () => {
     const provider = useSelector(state => state.provider.connection);
+    const chainId = useSelector(state => state.provider.chainId)
     const account = useSelector(state => state.provider.account);
     const balance = useSelector(state => state.provider.balance);
 
@@ -17,8 +19,11 @@ const Navbar = () => {
         await loadAccount(provider, dispatch);
     }
 
-    const networkHandler = async (event) => {
-        console.log(event.target.value);
+    const networkHandler = async (e) => {
+        await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: e.target.value }]
+        })
     }
 
     return(
@@ -31,11 +36,14 @@ const Navbar = () => {
         <div className='exchange__header--networks flex'>
             <img src={eth} alt="ETH Logo" className='Eth Logo' />
 
-            <select name="networks" id="networks" value="0" onChange={networkHandler}>
-                <option value="0" disabled>Select Networks</option>
-                <option value="0x7A69">Localhost</option>
-                <option value="0x2A">Kovan</option>
+            {chainId && (
+            <select name="networks" id="networks" value={config[chainId] ? `0x${chainId.toString(16)}` : '0'} onChange={networkHandler}>
+                 <option value="0" disabled>Select Networks</option>
+                 <option value="0x7A69">Localhost</option>
+                 <option value="0x2A">Kovan</option>
             </select>
+            )}
+            
         </div>
   
         <div className='exchange__header--account flex'>
@@ -45,9 +53,13 @@ const Navbar = () => {
                 <p><small>My Balance</small>0 ETH</p>
             )}
             { account ? (
-                <a href="">{account.slice(0, 5) + '...' + account.slice(38,42)}
+                <a href={`https://kovan.etherscan.io/${account}`}
+                target='_blank'
+                rel='norefferer'
+                >
+                    {account.slice(0, 5) + '...' + account.slice(38,42)}
                   <Blockies
-                    account={account}
+                    seed={account}
                     size={10}
                     scale={3}
                     color="#2187D0"
