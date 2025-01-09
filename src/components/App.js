@@ -11,6 +11,8 @@ import {
   loadExchange
 } from '../store/interactions';
 
+import Navbar from './Navbar';
+
 
 function App() {
 
@@ -23,8 +25,12 @@ function App() {
     // Fetch current netwoprk's chainId (e.g. hardhat: 31337, kovan: 42)
     const chainId = await loadNetwork(provider, dispatch);
 
+    window.ethereum.on('accountsChanged', () => {
+      loadAccount(provider, dispatch);
+    })
+
     // Fetch current account & balance from metamask
-    await loadAccount(provider, dispatch);
+    //await loadAccount(provider, dispatch);
 
 
     // Load token smart contracts
@@ -45,7 +51,7 @@ function App() {
   return (
     <div>
 
-      {/* Navbar */}
+      <Navbar />
 
       <main className='exchange grid'>
         <section className='exchange__section--left grid'>
