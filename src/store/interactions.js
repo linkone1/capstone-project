@@ -79,7 +79,7 @@ export const loadBalances = async (exchange, tokens, account, dispatch) => {
 // ------------------------------------------------------------------------------
 // TRANSFER TOKENS (DEPOSIT & WITHDRAWS)
 
-export const transferTokens =  async (provider, exchange, transferType, token, amount, dispatch) => {
+export const transferTokens =  async (provider, exchange, token, amount, dispatch) => {
   let transaction
 
   dispatch({ type: 'TRANSFER_REQUEST' })
