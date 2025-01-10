@@ -18,8 +18,8 @@ async function main() {
   console.log("Using chainId:", chainId)
 
   // Fetch deployed tokens
-  const Ctk = await ethers.getContractAt('Token', config[chainId].Ctk.address)
-  console.log(`Ctk Token fetched: ${Ctk.address}\n`)
+  const CTK = await ethers.getContractAt('Token', config[chainId].CTK.address)
+  console.log(`CTK Token fetched: ${CTK.address}\n`)
 
   const mETH = await ethers.getContractAt('Token', config[chainId].mETH.address)
   console.log(`mETH Token fetched: ${mETH.address}\n`)
@@ -27,9 +27,9 @@ async function main() {
   const mDAI = await ethers.getContractAt('Token', config[chainId].mDAI.address)
   console.log(`mDAI Token fetched: ${mDAI.address}\n`)
 
-  // Fetch the deployed exchange
-  const exchange = await ethers.getContractAt('Exchange', config[chainId].exchange.address)
-  console.log(`Exchange fetched: ${exchange.address}\n`)
+  // Fetch the deployed Exchange
+  const Exchange = await ethers.getContractAt('Exchange', config[chainId].Exchange.address)
+  console.log(`Exchange fetched: ${Exchange.address}\n`)
 
   // Give tokens to account[1]
   const sender = accounts[0]
@@ -41,28 +41,28 @@ async function main() {
   transaction = await mETH.connect(sender).transfer(receiver.address, amount)
   console.log(`Transferred ${amount} tokens from ${sender.address} to ${receiver.address}\n`)
 
-  // Set up exchange users
+  // Set up Exchange users
   const user1 = accounts[0]
   const user2 = accounts[1]
   amount = tokens(10000)
 
-  // user1 approves 10,000 Ctk...
-  transaction = await Ctk.connect(user1).approve(exchange.address, amount)
+  // user1 approves 10,000 CTK...
+  transaction = await CTK.connect(user1).approve(Exchange.address, amount)
   await transaction.wait()
   console.log(`Approved ${amount} tokens from ${user1.address}`)
 
-  // user1 deposits 10,000 Ctk...
-  transaction = await exchange.connect(user1).depositToken(Ctk.address, amount)
+  // user1 deposits 10,000 CTK...
+  transaction = await Exchange.connect(user1).depositToken(CTK.address, amount)
   await transaction.wait()
   console.log(`Deposited ${amount} Ether from ${user1.address}\n`)
 
   // User 2 Approves mETH
-  transaction = await mETH.connect(user2).approve(exchange.address, amount)
+  transaction = await mETH.connect(user2).approve(Exchange.address, amount)
   await transaction.wait()
   console.log(`Approved ${amount} tokens from ${user2.address}`)
 
   // User 2 Deposits mETH
-  transaction = await exchange.connect(user2).depositToken(mETH.address, amount)
+  transaction = await Exchange.connect(user2).depositToken(mETH.address, amount)
   await transaction.wait()
   console.log(`Deposited ${amount} tokens from ${user2.address}\n`)
 
@@ -72,13 +72,13 @@ async function main() {
 
   // User 1 makes order to get tokens
   let orderId
-  transaction = await exchange.connect(user1).makeOrder(mETH.address, tokens(100), Ctk.address, tokens(5))
+  transaction = await Exchange.connect(user1).makeOrder(mETH.address, tokens(100), CTK.address, tokens(5))
   result = await transaction.wait()
   console.log(`Made order from ${user1.address}`)
 
   // User 1 cancels order
   orderId = result.events[0].args.id
-  transaction = await exchange.connect(user1).cancelOrder(orderId)
+  transaction = await Exchange.connect(user1).cancelOrder(orderId)
   result = await transaction.wait()
   console.log(`Cancelled order from ${user1.address}\n`)
 
@@ -90,13 +90,13 @@ async function main() {
   //
 
   // User 1 makes order
-  transaction = await exchange.connect(user1).makeOrder(mETH.address, tokens(100), Ctk.address, tokens(10))
+  transaction = await Exchange.connect(user1).makeOrder(mETH.address, tokens(100), CTK.address, tokens(10))
   result = await transaction.wait()
   console.log(`Made order from ${user1.address}`)
 
   // User 2 fills order
   orderId = result.events[0].args.id
-  transaction = await exchange.connect(user2).fillOrder(orderId)
+  transaction = await Exchange.connect(user2).fillOrder(orderId)
   result = await transaction.wait()
   console.log(`Filled order from ${user1.address}\n`)
 
@@ -104,13 +104,13 @@ async function main() {
   await wait(1)
 
   // User 1 makes another order
-  transaction = await exchange.makeOrder(mETH.address, tokens(50), Ctk.address, tokens(15))
+  transaction = await Exchange.makeOrder(mETH.address, tokens(50), CTK.address, tokens(15))
   result = await transaction.wait()
   console.log(`Made order from ${user1.address}`)
 
   // User 2 fills another order
   orderId = result.events[0].args.id
-  transaction = await exchange.connect(user2).fillOrder(orderId)
+  transaction = await Exchange.connect(user2).fillOrder(orderId)
   result = await transaction.wait()
   console.log(`Filled order from ${user1.address}\n`)
 
@@ -118,13 +118,13 @@ async function main() {
   await wait(1)
 
   // User 1 makes final order
-  transaction = await exchange.connect(user1).makeOrder(mETH.address, tokens(200), Ctk.address, tokens(20))
+  transaction = await Exchange.connect(user1).makeOrder(mETH.address, tokens(200), CTK.address, tokens(20))
   result = await transaction.wait()
   console.log(`Made order from ${user1.address}`)
 
   // User 2 fills final order
   orderId = result.events[0].args.id
-  transaction = await exchange.connect(user2).fillOrder(orderId)
+  transaction = await Exchange.connect(user2).fillOrder(orderId)
   result = await transaction.wait()
   console.log(`Filled order from ${user1.address}\n`)
 
@@ -137,7 +137,7 @@ async function main() {
 
   // User 1 makes 10 orders
   for(let i = 1; i <= 10; i++) {
-    transaction = await exchange.connect(user1).makeOrder(mETH.address, tokens(10 * i), Ctk.address, tokens(10))
+    transaction = await Exchange.connect(user1).makeOrder(mETH.address, tokens(10 * i), CTK.address, tokens(10))
     result = await transaction.wait()
 
     console.log(`Made order from ${user1.address}`)
@@ -148,7 +148,7 @@ async function main() {
 
   // User 2 makes 10 orders
   for (let i = 1; i <= 10; i++) {
-    transaction = await exchange.connect(user2).makeOrder(Ctk.address, tokens(10), mETH.address, tokens(10 * i))
+    transaction = await Exchange.connect(user2).makeOrder(CTK.address, tokens(10), mETH.address, tokens(10 * i))
     result = await transaction.wait()
 
     console.log(`Made order from ${user2.address}`)
