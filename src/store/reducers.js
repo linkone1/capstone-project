@@ -1,4 +1,3 @@
-import { isError } from "lodash"
 import { transferTokens } from "./interactions"
 
 export const provider = (state = {}, action) => {
@@ -237,7 +236,7 @@ export const exchange = (state = DEFAULT_EXCHANGE_STATE, action) => {
     case 'TRANSFER_REQUEST':
       return {
         ...state,
-        trasnsaction: {
+        transaction: {
           transactionType: 'Transfer',
           isPending: true,
           isSuccessful: false
