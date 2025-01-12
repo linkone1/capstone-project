@@ -51,6 +51,75 @@ const decorateOrder = (order, tokens) => {
     })
 }
 
+
+// ------------------------------------------------------------------------
+// ALL FILLED ORDERS
+
+export const filledOrdersSelector = createSelector(
+    filledOrders,
+    tokens,
+    (orders, tokens) => {
+        if (!tokens[0] || !tokens[1]) { return }
+
+        // Filter orders by selected tokens
+        orders = orders.filter((o) => o.tokenGet === tokens[0].address  || o.tokenGet === tokens[1].address);
+        orders = orders.filter((o) => o.tokenGive === tokens[0].address || o.tokenGive === tokens[1].address);
+
+        // [X] Step 1: Sort orders by time ascending
+        // [X] Step 2: apply order collors (decorate orders)
+        // Step 3: sort orders by time descending for UI
+
+        // Sort orders by time ascending for price comparison
+        orders = orders.sort((a, b) => a.timestamp - b.timestamp);
+
+        // Decorate the orders
+        orders = decorateFilledOrders(orders, tokens);
+
+        // Sort orders by date descending for display
+        orders = orders.sort((a, b) => b.timestamp - a.timestamp);
+
+        console.log(orders);
+
+        return orders;
+    }
+)
+
+const decorateFilledOrders = (orders, tokens) => {
+    // Track previous order to compare history
+    let previousOrder = orders[0]
+
+   return (
+    orders.map((order) => {
+        order = decorateOrder(order, tokens);
+        order = decorateFilledOrder(order, previousOrder);
+        previousOrder = order // Update the previous order once it's decorated
+        return order;
+    })
+   )
+}
+
+const decorateFilledOrder = (order, previousOrder) => {
+    return({
+        ...order,
+        tokenPriceClass: tokenPriceClass(order.tokenPrice, order.id, previousOrder)
+    })
+}
+
+const tokenPriceClass = (tokenPrice, orderId, previousOrder) => {
+    // Show green price if only one order exists
+    if (previousOrder.id === orderId) {
+        return GREEN;
+    }
+
+    if (previousOrder.tokenPrice <= tokenPrice) {
+        return GREEN; // success
+    } else {
+        return RED; // danger
+    }
+}
+
+
+
 // ------------------------------------------------------------------------
 // ORDER BOOK
 
@@ -58,7 +127,6 @@ export const orderBookSelector = createSelector(
     openOrders, 
     tokens, 
     (orders, tokens) => {
-
         if (!tokens[0] || !tokens[1]) { return }
 
     // Filter orders by selected tokens
@@ -153,8 +221,6 @@ export const priceChartSelector = createSelector(
 const buildGraphData = (orders) => {
     // Group the orders by hour for the graph
     orders = groupBy(orders, (o) => moment.unix(o.timestamp).startOf('day').format());
-
-        console.log(orders);
 
         // Get each hour where data exists
         const hours = Object.keys(orders);
